@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Result</title>
+</head>
+<body>
+    <h2>Phishing Analysis Result</h2>
+
+    <p><strong>URL:</strong> {{ url }}</p>
+    <p><strong>Risk Score:</strong> {{ score }}/100</p>
+    <p><strong>Risk Level:</strong> {{ risk }}</p>
+
+    <h3>Reasons:</h3>
+    <ul>
+        {% for reason in reasons %}
+            <li>{{ reason }}</li>
+        {% endfor %}
+    </ul>
+
+    <br>
+    <a href="/phishing">Analyze Another URL</a>
+</body>
+</html>
