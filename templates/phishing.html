@@ -1,19 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Phishing Detection</title>
-</head>
-<body>
-    <h2>Phishing URL Detection</h2>
+{% extends "base.html" %}
 
-    <form method="POST" action="/analyze">
-        <label>Enter URL:</label><br><br>
-        <input type="text" name="url" required style="width: 400px;">
-        <br><br>
-        <button type="submit">Analyze</button>
-    </form>
+{% block content %}
 
-    <br>
-    <a href="/">Back to Home</a>
-</body>
-</html>
+<h2 class="page-title">🛡 Phishing URL Detector</h2>
+
+<div class="form-container">
+    <div class="card">
+        <form method="POST">
+
+            <label>Enter URL</label>
+            <input type="text" name="url" placeholder="https://example.com" required>
+
+            <button type="submit" class="btn">Analyze URL</button>
+
+        </form>
+
+        {% if result %}
+            <div class="result-box 
+                {% if result == 'Safe' %}safe
+                {% elif result == 'Suspicious' %}suspicious
+                {% else %}phishing
+                {% endif %}
+            ">
+                Result: {{ result }}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

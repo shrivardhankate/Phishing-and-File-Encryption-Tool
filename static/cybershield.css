@@ -1,0 +1,131 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* NAVBAR */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 60px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+        }
+
+        .navbar{
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-decoration: none;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            list-style: none;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #00c6ff;
+        }
+
+        /* MAIN CONTAINER */
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: auto;
+            padding: 60px 0;
+            flex: 1;
+        }
+
+        /* CARD STYLE */
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 40px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transition: 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* BUTTON */
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 8px;
+            background: #00c6ff;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s ease;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #0072ff;
+        }
+
+        /* FORM */
+        form input[type="file"],
+        form input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border: none;
+            outline: none;
+        }
+
+        /* GRID */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 15px;
+                padding: 20px;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }

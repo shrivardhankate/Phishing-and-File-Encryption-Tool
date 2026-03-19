@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="page-title">🔐 Encrypt File</h2>
+
+<div class="form-container">
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+
+            <label>Select File</label>
+            <input type="file" name="file" required>
+
+            <button type="submit" class="btn">Encrypt File</button>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="page-title">🔐 File Encrypted Successfully</h2>
+
+<div class="form-container">
+    <div class="card">
+
+        <p><strong>Encryption Key:</strong></p>
+
+        <div style="
+            background: rgba(0,0,0,0.4);
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin-bottom: 15px;
+        ">
+            {{ key }}
+        </div>
+
+        <p style="color: orange;">
+            ⚠ Save this key carefully. Without it, you cannot decrypt the file.
+        </p>
+
+        <br>
+
+        <a href="/download/{{ filename }}" class="btn">
+            Download Encrypted File
+        </a>
+
+        <br><br>
+
+        <a href="/" class="btn">Back to Home</a>
+
+    </div>
+</div>
+
+{% endblock %}

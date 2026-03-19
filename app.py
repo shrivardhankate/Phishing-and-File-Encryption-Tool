@@ -4,12 +4,13 @@ from urllib.parse import urlparse
 import ipaddress
 from cryptography.fernet import Fernet
 import os 
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, abort
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "encrypted_files")
+ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "uploads/Encrypted")
+DECRYPTED_FOLDER = os.path.join(BASE_DIR, "uploads/Decrypted")
 
 app = Flask(__name__)
 
@@ -81,11 +82,42 @@ def analyze():
 def home():
     return render_template('index.html')
 
-@app.route('/encryption')
+@app.route('/encrypt')
 def encryption():
-    return render_template('encryption.html')
+    return render_template('encrypt.html')
 
+@app.route('/decrypt', methods=['GET', 'POST'])
+def decrypt_file():
+    if request.method == 'POST':
+        encrypted_file = request.files['file']
+        key = request.form['key'].encode()
 
+        if encrypted_file:
+            encrypted_path = os.path.join("uploads", encrypted_file.filename)
+            encrypted_file.save(encrypted_path)
+
+            cipher = Fernet(key)
+
+            with open(encrypted_path, "rb") as f:
+                encrypted_data = f.read()
+
+            try:
+                decrypted_data = cipher.decrypt(encrypted_data)
+            except:
+                return "Invalid Key or Corrupted File"
+
+            decrypted_filename = encrypted_file.filename.replace(".enc", "")
+            decrypted_path = os.path.join(DECRYPTED_FOLDER, decrypted_filename)
+
+            with open(decrypted_path, "wb") as f:
+                f.write(decrypted_data)
+
+            return render_template(
+                "decrypt_result.html", 
+                filename=decrypted_filename
+                ) 
+
+    return render_template("decrypt.html")
 
 @app.route('/phishing')
 def phishing():
@@ -120,19 +152,17 @@ def encrypt_file():
         with open(encrypted_path, "wb") as f:
             f.write(encrypted_data)
 
-        return f"""
-        <h3>File Encrypted Successfully</h3>
-        <p><strong>Encryption Key:</strong> {key.decode()}</p>
-        <p><b>Save this key securely. It is required for decryption.</b></p>
-
-        <br>
-        <a href="/download/{encrypted_filename}">Download Encrypted File</a>
-
-        <br><br>
-        <a href="/">Back to Home</a>
-        """
+        return render_template(
+            "encrypt_result.html",
+            filename=encrypted_filename,
+            key=key.decode())
         
     return "No file uploaded."
+
+@app.route('/download/<filename>')
+def download_decrypted(filename):
+    file_path = os.path.join(DECRYPTED_FOLDER, filename)
+    return send_file(file_path, as_attachment=True)
 
 @app.route('/download/<filename>')
 def download_file(filename):

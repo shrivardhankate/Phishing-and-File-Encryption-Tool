@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="page-title">🔓 Decrypt File</h2>
+
+<div class="form-container">
+    <div class="card">
+        <form method="POST" enctype="multipart/form-data">
+
+            <label>Upload Encrypted File</label>
+            <input type="file" name="file" required>
+
+            <label>Enter Secret Key</label>
+            <input type="text" name="key" placeholder="Paste your key here" required>
+
+            <button type="submit" class="btn">Decrypt File</button>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}
