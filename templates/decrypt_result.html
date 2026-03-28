@@ -9,9 +9,19 @@
 
         <p>Your file has been decrypted successfully.</p>
 
+        <div style="
+            background: rgba(0,0,0,0.4);
+            padding: 10px;
+            border-radius: 8px;
+            word-break: break-all;
+            margin-bottom: 15px;
+        ">
+            {{ key }}
+        </div>
+
         <br>
 
-        <a href="/download/{{ filename }}" class="btn">
+        <a href="/download-decrypted/{{ filename }}" class="btn">
             Download Decrypted File
         </a>
 

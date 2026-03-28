@@ -9,8 +9,8 @@ from flask import Flask, render_template, request, send_file, abort
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "uploads/Encrypted")
-DECRYPTED_FOLDER = os.path.join(BASE_DIR, "uploads/Decrypted")
+ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "Encrypted")
+DECRYPTED_FOLDER = os.path.join(BASE_DIR, "Decrypted")
 
 app = Flask(__name__)
 
@@ -92,9 +92,10 @@ def decrypt_file():
         encrypted_file = request.files['file']
         key = request.form['key'].encode()
 
-        if encrypted_file:
+        if encrypted_file and key:
             encrypted_path = os.path.join("uploads", encrypted_file.filename)
             encrypted_file.save(encrypted_path)
+            os.makedirs(DECRYPTED_FOLDER, exist_ok=True)
 
             cipher = Fernet(key)
 
@@ -113,7 +114,7 @@ def decrypt_file():
                 f.write(decrypted_data)
 
             return render_template(
-                "decrypt_result.html", 
+                "decrypt_result.html",
                 filename=decrypted_filename
                 ) 
 
@@ -159,13 +160,13 @@ def encrypt_file():
         
     return "No file uploaded."
 
-@app.route('/download/<filename>')
+@app.route('/download-decrypted/<filename>')
 def download_decrypted(filename):
     file_path = os.path.join(DECRYPTED_FOLDER, filename)
     return send_file(file_path, as_attachment=True)
 
-@app.route('/download/<filename>')
-def download_file(filename):
+@app.route('/download-encrypted/<filename>')
+def download_encrypted(filename):
     file_path = os.path.join(ENCRYPTED_FOLDER, filename)
     print("Downloading:", file_path)
     return send_file(file_path, as_attachment=True)
