@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Analysis Result</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+
     <h2>Phishing Analysis Result</h2>
 
     <p><strong>URL:</strong> {{ url }}</p>
@@ -19,5 +16,5 @@
 
     <br>
     <a href="/phishing">Analyze Another URL</a>
-</body>
-</html>
+
+{% endblock %}

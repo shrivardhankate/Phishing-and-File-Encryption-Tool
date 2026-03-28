@@ -120,8 +120,10 @@ def decrypt_file():
 
     return render_template("decrypt.html")
 
-@app.route('/phishing')
+@app.route('/phishing', methods = ['GET', 'POST'])
 def phishing():
+    if request.method == 'POST':
+        return analyze()
     return render_template('phishing.html')
 
 @app.route('/encrypt', methods=['POST'])
