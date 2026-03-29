@@ -13,17 +13,15 @@ def init_db():
     
     cursor.execute("PRAGMA journal_mode=WAL;")
 
-    # Users Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL,
+        username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     ''')
 
-    # File Logs Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS file_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +32,6 @@ def init_db():
     )
     ''')
 
-    # Phishing Logs Table
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS phishing_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

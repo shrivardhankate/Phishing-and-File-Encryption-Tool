@@ -1,15 +1,14 @@
 from fileinput import filename
-
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file, abort, redirect, url_for
 import re
 from urllib.parse import urlparse
 import ipaddress
 from cryptography.fernet import Fernet
 import os 
-from flask import Flask, render_template, request, send_file, abort
 from database import init_db
 from database import get_db_connection
 from werkzeug.utils import secure_filename 
+from werkzeug.security import generate_password_hash, check_password_hash
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -35,6 +34,50 @@ def log_file_action(user_id, filename, action):
 
 @app.route('/')
 def home():
+    return render_template('login.html')
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username', '').strip()
+    password = request.form.get('password', '').strip()
+
+    if not username or not password:
+        return render_template('login.html', error='Username and password are required.')
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        user = cursor.execute(
+            "SELECT * FROM users WHERE username = ?",
+            (username,)
+        ).fetchone()
+
+        if user:
+            if check_password_hash(user['password_hash'], password):
+                return redirect(url_for('home_page'))
+            else:
+                return render_template('login.html', error="Invalid password")
+
+        else:
+            hashed_password = generate_password_hash(password)
+
+            cursor.execute(
+                "INSERT INTO users (username, password_hash) VALUES (?, ?)",
+                (username, hashed_password)
+            )
+
+            conn.commit()
+
+            return redirect(url_for('home_page'))
+
+    finally:
+        conn.close()
+
+@app.route('/home')
+def home_page():
     return render_template('index.html')
 
 @app.route('/encrypt')
@@ -64,17 +107,14 @@ def analyze():
     score = 0
     reasons = []
 
-    # Check HTTPS
     if not url.startswith("https"):
         score += 20
         reasons.append("URL does not use HTTPS.")
 
-    # URL length
     if len(url) > 75:
         score += 15
         reasons.append("URL length is suspiciously long.")
     
-    #check for IP address in URL
     try:
         ipaddress.ip_address(urlparse(url).netloc)
         score += 25
@@ -82,7 +122,6 @@ def analyze():
     except ValueError:
         pass
     
-    #suspicious TDL 
     suspicious_tlds = [".tk", ".ml", ".ga", ".cf"]
     for tld in suspicious_tlds:
         if url.lower().endswith(tld):
@@ -90,7 +129,6 @@ def analyze():
             reasons.append(f"URL uses suspicious TLD: {tld}")
             break
 
-    # Suspicious symbols
     if "@" in url:
         score += 20
         reasons.append("URL contains '@' symbol.")
@@ -99,13 +137,11 @@ def analyze():
         score += 10
         reasons.append("URL contains hyphen (-).")
 
-    # Multiple subdomains
     domain = urlparse(url).netloc
     if domain.count(".") > 2:
         score += 15
         reasons.append("URL contains multiple subdomains.")
 
-    # Suspicious keywords
     suspicious_keywords = ["login", "verify", "secure", "update", "bank"]
     for word in suspicious_keywords:
         if word in url.lower():
@@ -113,7 +149,6 @@ def analyze():
             reasons.append(f"URL contains suspicious keyword: {word}")
             break
 
-    # Risk level
     if score <= 20:
         risk = "Low Risk"
     elif score <= 50:
@@ -179,20 +214,16 @@ def encrypt_file():
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             os.makedirs(ENCRYPTED_FOLDER, exist_ok=True)
 
-            # Save original file
             filename = secure_filename(file.filename)
             original_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(original_path)
 
-            # Generate key
             key = Fernet.generate_key()
             cipher = Fernet(key)
 
-            # Read file
             with open(original_path, "rb") as f:
                 file_data = f.read()
 
-            # Encrypt
             encrypted_data = cipher.encrypt(file_data)
 
             encrypted_filename = filename + ".enc"
@@ -201,7 +232,6 @@ def encrypt_file():
             with open(encrypted_path, "wb") as f:
                 f.write(encrypted_data)
 
-            # DATABASE LOGGING
             log_file_action(1, file.filename, "encrypt")
 
             return render_template(

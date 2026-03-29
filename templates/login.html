@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CyberShield</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>
+    <h2 class="page-title">🔐 Welcome to CyberShield</h2>
+
+    <div class="form-container">
+        <div class="card" style="max-width:400px; margin:0 auto;">
+
+            <form method="POST" action="/login">
+                {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                {% endif %}
+
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter your username" required>
+
+                <label>Password</label>
+                <input class="form-control" type="password" name="password" placeholder="Enter your password" required>
+
+                <button type="submit" class="btn">Login</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<body>
+    
+</body>
+</html>
