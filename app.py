@@ -1,3 +1,5 @@
+from fileinput import filename
+
 from flask import Flask, render_template, request
 import re
 from urllib.parse import urlparse
@@ -5,6 +7,9 @@ import ipaddress
 from cryptography.fernet import Fernet
 import os 
 from flask import Flask, render_template, request, send_file, abort
+from database import init_db
+from database import get_db_connection
+from werkzeug.utils import secure_filename 
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -13,6 +18,45 @@ ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "Encrypted")
 DECRYPTED_FOLDER = os.path.join(BASE_DIR, "Decrypted")
 
 app = Flask(__name__)
+
+init_db()
+
+def log_file_action(user_id, filename, action):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO file_logs (user_id, file_name, action) VALUES (?, ?, ?)",
+        (user_id, filename, action)
+    )
+
+    conn.commit()
+    conn.close()
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/encrypt')
+def encryption():
+    return render_template('encrypt.html')
+
+@app.route('/phishing', methods = ['GET', 'POST'])
+def phishing():
+    if request.method == 'POST':
+        return analyze()
+    return render_template('phishing.html')
+
+@app.route('/download-decrypted/<filename>')
+def download_decrypted(filename):
+    file_path = os.path.join(DECRYPTED_FOLDER, filename)
+    return send_file(file_path, as_attachment=True)
+
+@app.route('/download-encrypted/<filename>')
+def download_encrypted(filename):
+    file_path = os.path.join(ENCRYPTED_FOLDER, filename)
+    print("Downloading:", file_path)
+    return send_file(file_path, as_attachment=True)
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -76,15 +120,18 @@ def analyze():
         risk = "Medium Risk"
     else:
         risk = "High Risk"
+    #Store phishing analysis in database
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO phishing_logs (target_email, status) VALUES (?, ?)",
+        (url, risk)
+    )
+
+    conn.commit()
+    conn.close()
     return render_template("result.html", url=url, score=score, risk=risk, reasons=reasons)
-
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/encrypt')
-def encryption():
-    return render_template('encrypt.html')
 
 @app.route('/decrypt', methods=['GET', 'POST'])
 def decrypt_file():
@@ -93,7 +140,8 @@ def decrypt_file():
         key = request.form['key'].encode()
 
         if encrypted_file and key:
-            encrypted_path = os.path.join("uploads", encrypted_file.filename)
+            filename = secure_filename(encrypted_file.filename)
+            encrypted_path = os.path.join("uploads", filename)            
             encrypted_file.save(encrypted_path)
             os.makedirs(DECRYPTED_FOLDER, exist_ok=True)
 
@@ -112,6 +160,8 @@ def decrypt_file():
 
             with open(decrypted_path, "wb") as f:
                 f.write(decrypted_data)
+            
+            log_file_action(1, decrypted_filename, "decrypt")
 
             return render_template(
                 "decrypt_result.html",
@@ -120,58 +170,55 @@ def decrypt_file():
 
     return render_template("decrypt.html")
 
-@app.route('/phishing', methods = ['GET', 'POST'])
-def phishing():
-    if request.method == 'POST':
-        return analyze()
-    return render_template('phishing.html')
-
-@app.route('/encrypt', methods=['POST'])
+@app.route('/encrypt', methods=['GET', 'POST'])
 def encrypt_file():
-    file = request.files['file']
+    if request.method == 'POST':
+        file = request.files['file']
 
-    if file:
-        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-        os.makedirs(ENCRYPTED_FOLDER, exist_ok=True)
+        if file:
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            os.makedirs(ENCRYPTED_FOLDER, exist_ok=True)
 
-        # Save original file
-        original_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(original_path)
+            # Save original file
+            filename = secure_filename(file.filename)
+            original_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(original_path)
 
-        # Generate key
-        key = Fernet.generate_key()
-        cipher = Fernet(key)
+            # Generate key
+            key = Fernet.generate_key()
+            cipher = Fernet(key)
 
-        # Read original file
-        with open(original_path, "rb") as f:
-            file_data = f.read()
+            # Read file
+            with open(original_path, "rb") as f:
+                file_data = f.read()
 
-        # Encrypt
-        encrypted_data = cipher.encrypt(file_data)
+            # Encrypt
+            encrypted_data = cipher.encrypt(file_data)
 
-        encrypted_filename = file.filename + ".enc"
-        encrypted_path = os.path.join(ENCRYPTED_FOLDER, encrypted_filename)
+            encrypted_filename = filename + ".enc"
+            encrypted_path = os.path.join(ENCRYPTED_FOLDER, encrypted_filename)
 
-        with open(encrypted_path, "wb") as f:
-            f.write(encrypted_data)
+            with open(encrypted_path, "wb") as f:
+                f.write(encrypted_data)
 
-        return render_template(
-            "encrypt_result.html",
-            filename=encrypted_filename,
-            key=key.decode())
-        
-    return "No file uploaded."
+            # DATABASE LOGGING
+            log_file_action(1, file.filename, "encrypt")
 
-@app.route('/download-decrypted/<filename>')
-def download_decrypted(filename):
-    file_path = os.path.join(DECRYPTED_FOLDER, filename)
-    return send_file(file_path, as_attachment=True)
+            return render_template(
+                "encrypt_result.html",
+                filename=encrypted_filename,
+                key=key.decode()
+            )
 
-@app.route('/download-encrypted/<filename>')
-def download_encrypted(filename):
-    file_path = os.path.join(ENCRYPTED_FOLDER, filename)
-    print("Downloading:", file_path)
-    return send_file(file_path, as_attachment=True)
+    return render_template('encrypt.html')
+
+@app.route('/logs')
+def view_logs():
+    conn = get_db_connection()
+    logs = conn.execute("SELECT * FROM file_logs").fetchall()
+    conn.close()
+
+    return str([dict(log) for log in logs])
 
 if __name__ == '__main__':
     app.run(debug=True)
