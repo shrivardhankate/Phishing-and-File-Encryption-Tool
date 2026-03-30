@@ -9,6 +9,7 @@ from database import init_db
 from database import get_db_connection
 from werkzeug.utils import secure_filename 
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import session
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -34,7 +35,14 @@ def log_file_action(user_id, filename, action):
 
 @app.route('/')
 def home():
+    if 'user' not in session:
+        return redirect(url_for('login'))
     return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)   # destroy session
+    return redirect(url_for('login'))
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -57,6 +65,7 @@ def login():
 
         if user:
             if check_password_hash(user['password_hash'], password):
+                session['user'] = username
                 return redirect(url_for('home_page'))
             else:
                 return render_template('login.html', error="Invalid password")
@@ -75,6 +84,13 @@ def login():
 
     finally:
         conn.close()
+        
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/home')
 def home_page():
