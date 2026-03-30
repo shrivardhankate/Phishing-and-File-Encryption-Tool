@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CyberShield</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='cybershield.css') }}">
 </head>
+<body>
 
-{% extends "base.html" %}
+<div>
+    <nav>
+        <a class="navbar" href="/">CyberShield</a>
 
-{% block content %}
-
+    </nav>
+</div>
 <div>
     <h2 class="page-title">🔐 Welcome to CyberShield</h2>
 
@@ -17,9 +21,6 @@
         <div class="card" style="max-width:400px; margin:0 auto;">
 
             <form method="POST" action="/login">
-                {% if error %}
-                    <div class="error-message">{{ error }}</div>
-                {% endif %}
 
                 <label>Username</label>
                 <input type="text" name="username" placeholder="Enter your username" required>
@@ -33,10 +34,6 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-
-<body>
     
 </body>
 </html>

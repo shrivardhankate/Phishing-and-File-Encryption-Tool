@@ -18,6 +18,7 @@ ENCRYPTED_FOLDER = os.path.join(BASE_DIR, "Encrypted")
 DECRYPTED_FOLDER = os.path.join(BASE_DIR, "Decrypted")
 
 app = Flask(__name__)
+app.secret_key = 'your_super_secret_key_here'
 
 init_db()
 
@@ -36,18 +37,18 @@ def log_file_action(user_id, filename, action):
 @app.route('/')
 def home():
     if 'user' not in session:
-        return redirect(url_for('login'))
+        return redirect(url_for('login_page'))
     return render_template('login.html')
 
 @app.route('/logout')
 def logout():
     session.pop('user', None)   # destroy session
-    return redirect(url_for('login'))
+    return redirect(url_for('login_page'))
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
-@app.route('/login', methods=['POST'])
-def login():
+@app.route('/login', methods=['POST', 'GET'])
+def login_page():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '').strip()
 

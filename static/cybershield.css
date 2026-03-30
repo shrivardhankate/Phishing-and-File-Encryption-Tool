@@ -117,6 +117,30 @@
             gap: 30px;
         }
 
+        .page-title {
+            text-align: center;
+            margin-bottom: 30px;
+            margin-top: 100px;
+            font-size: 28px;
+            letter-spacing: 1px;
+        }
+
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            background-color: rgba(255,255,255,0.15);
+            color: white;
+        }
+
         /* FOOTER */
         footer {
             text-align: center;
@@ -125,8 +149,22 @@
             font-size: 14px;
             opacity: 0.8;
         }
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            background: #00c6ff;
+            border: none;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
 
-        /* RESPONSIVE */
+        .btn:hover {
+            background: #0072ff;
+        }
+
         @media (max-width: 768px) {
             nav {
                 flex-direction: column;
