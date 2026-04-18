@@ -3,42 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberShield</title>
+    <title>CyberShield - Register</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='cybershield.css') }}">
 </head>
 <body>
 
 <div>
     <nav>
-        <a class="navbar" href="/">CyberShield</a>
-
+        <a class="navbar" href="/">🛡️ CyberShield</a>
     </nav>
 </div>
-<div>
-    <h2 class="page-title">🔐 Welcome to CyberShield</h2>
+
+<div class="container">
+    <h2 class="page-title">🔐 Create an Account</h2>
 
     <div class="form-container">
         <div class="card" style="max-width:400px; margin:0 auto;">
 
+            <!-- This shows error messages -->
+            {% if error %}
+            <div style="background: rgba(255,0,0,0.2); color:#ff4d4d; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center;">
+                ⚠️ {{ error }}
+            </div>
+            {% endif %}
+
             <form method="POST">
-                <input style="width: 100%;
-                    padding: 12px;
-                    margin-top: 10px;
-                    margin-bottom: 20px;
-                    border-radius: 8px;" type="text" name="username" placeholder="Choose Username" required>
-                <input style="width: 100%;
-                    padding: 12px;
-                    margin-top: 10px;
-                    margin-bottom: 20px;
-                    border-radius: 8px;" type="password" name="password" placeholder="Choose Password" required>
+                <input class="form-control" type="text" name="username" placeholder="Choose a Username" required>
+                <input class="form-control" type="password" name="password" placeholder="Choose a Password" required>
                 <button class="btn" type="submit">Register</button>
             </form>
 
-<p>Already have an account? <a href="{{ url_for('login_page') }}">Login</a></p>
+            <p style="margin-top:10px; font-size:13px; color:#aaa; text-align:center;">
+                Password must be 6+ characters, include a number and uppercase letter.
+            </p>
 
+            <p style="margin-top:15px; text-align:center;">
+                Already have an account? <a href="{{ url_for('login_page') }}" style="color:#00c6ff;">Login</a>
+            </p>
         </div>
     </div>
 </div>
-    
+
 </body>
 </html>

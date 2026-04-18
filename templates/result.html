@@ -1,20 +1,33 @@
 {% extends "base.html" %}
 {% block content %}
 
-    <h2>Phishing Analysis Result</h2>
+<h2 class="page-title">🛡️ Phishing Analysis Result</h2>
 
-    <p><strong>URL:</strong> {{ url }}</p>
-    <p><strong>Risk Score:</strong> {{ score }}/100</p>
-    <p><strong>Risk Level:</strong> {{ risk }}</p>
+<div class="form-container" style="max-width: 700px;">
+    <div class="card">
+        <p><strong>URL Analyzed:</strong> <code style="word-break:break-all; color:#00c6ff;">{{ url }}</code></p>
+        <p style="margin-top:10px;"><strong>Risk Score:</strong> {{ score }} / 100+</p>
 
-    <h3>Reasons:</h3>
-    <ul>
-        {% for reason in reasons %}
-            <li>{{ reason }}</li>
-        {% endfor %}
-    </ul>
+        <div class="result-box 
+            {% if 'Low' in risk %}safe
+            {% elif 'Medium' in risk %}suspicious
+            {% else %}phishing{% endif %}"
+            style="margin: 20px 0; font-size: 20px;">
+            {{ risk }}
+        </div>
 
-    <br>
-    <a href="/phishing">Analyze Another URL</a>
+        <h3 style="margin-bottom:10px;">📋 Analysis Details:</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for reason in reasons %}
+            <li style="padding: 8px; margin: 5px 0; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                • {{ reason }}
+            </li>
+            {% endfor %}
+        </ul>
+
+        <a href="/phishing" class="btn" style="margin-top: 20px;">Check Another URL</a>
+        <a href="/home" class="btn" style="margin-top: 10px; background: rgba(255,255,255,0.1);">Back to Home</a>
+    </div>
+</div>
 
 {% endblock %}

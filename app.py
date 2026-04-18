@@ -64,9 +64,9 @@ def check_dns(domain):
 
 @app.route('/')
 def home():
-    if 'user' not in session:
+    if 'user' in session:
         return redirect(url_for('home_page'))
-    return render_template('login_page')
+    return redirect(url_for('login_page'))
 
 @app.route('/logout')
 def logout():
@@ -233,15 +233,16 @@ def analyze():
             reasons.append(f"URL contains suspicious keyword: {word}")
             break
         
-    if not exists:
-        risk = "High Risk"
     if score <= 20:
-        risk = "Low Risk"
+        risk = "Low Risk ✅"
     elif score <= 50:
-        risk = "Medium Risk"
+        risk = "Medium Risk ⚠️"
     else:
-        risk = "High Risk"
-    #Store phishing analysis in database
+        risk = "High Risk 🚨"
+
+    if not exists and score < 51:
+        risk = "High Risk 🚨"
+    
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -255,39 +256,44 @@ def analyze():
     return render_template("result.html", url=url, score=score, risk=risk, reasons=reasons)
 
 @app.route('/decrypt', methods=['GET', 'POST'])
+@login_required
 def decrypt_file():
     if request.method == 'POST':
         encrypted_file = request.files['file']
-        key = request.form['key'].encode()
+        key = request.form['key'].strip().encode()
 
         if encrypted_file and key:
             filename = secure_filename(encrypted_file.filename)
-            encrypted_path = os.path.join("uploads", filename)            
+            encrypted_path = os.path.join(UPLOAD_FOLDER, filename)  # ← Use variable, not string
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             encrypted_file.save(encrypted_path)
             os.makedirs(DECRYPTED_FOLDER, exist_ok=True)
 
-            cipher = Fernet(key)
-
-            with open(encrypted_path, "rb") as f:
-                encrypted_data = f.read()
-
             try:
+                cipher = Fernet(key)
+                with open(encrypted_path, "rb") as f:
+                    encrypted_data = f.read()
                 decrypted_data = cipher.decrypt(encrypted_data)
-            except:
-                return "Invalid Key or Corrupted File"
+            except Exception:
+                # Show a styled error page instead of plain text
+                return render_template("decrypt.html", error="❌ Invalid key or corrupted file. Please try again.")
 
-            decrypted_filename = encrypted_file.filename.replace(".enc", "")
+            decrypted_filename = filename.replace(".enc", "")
             decrypted_path = os.path.join(DECRYPTED_FOLDER, decrypted_filename)
 
             with open(decrypted_path, "wb") as f:
                 f.write(decrypted_data)
-            
-            log_file_action(1, decrypted_filename, "decrypt")
 
-            return render_template(
-                "decrypt_result.html",
-                filename=decrypted_filename
-                ) 
+            # Get real user ID
+            conn = get_db_connection()
+            user = conn.execute("SELECT id FROM users WHERE username = ?",
+                                (session['user'],)).fetchone()
+            conn.close()
+            user_id = user['id'] if user else 1
+
+            log_file_action(user_id, decrypted_filename, "decrypt")
+
+            return render_template("decrypt_result.html", filename=decrypted_filename)
 
     return render_template("decrypt.html")
 
@@ -298,6 +304,13 @@ def encrypt_file():
         file = request.files['file']
 
         if file:
+            # Get the real logged-in user's ID
+            conn = get_db_connection()
+            user = conn.execute("SELECT id FROM users WHERE username = ?", 
+                                (session['user'],)).fetchone()
+            conn.close()
+            user_id = user['id'] if user else 1
+
             os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             os.makedirs(ENCRYPTED_FOLDER, exist_ok=True)
 
@@ -312,20 +325,17 @@ def encrypt_file():
                 file_data = f.read()
 
             encrypted_data = cipher.encrypt(file_data)
-
             encrypted_filename = filename + ".enc"
             encrypted_path = os.path.join(ENCRYPTED_FOLDER, encrypted_filename)
 
             with open(encrypted_path, "wb") as f:
                 f.write(encrypted_data)
 
-            log_file_action(1, file.filename, "encrypt")
+            log_file_action(user_id, file.filename, "encrypt")  # ← Real user ID
 
-            return render_template(
-                "encrypt_result.html",
-                filename=encrypted_filename,
-                key=key.decode()
-            )
+            return render_template("encrypt_result.html",
+                                   filename=encrypted_filename,
+                                   key=key.decode())
 
     return render_template('encrypt.html')
 
