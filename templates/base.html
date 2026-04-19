@@ -1,119 +1,84 @@
-<!-- templates/base.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> CyberShield</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
-    <style>
-        .page-title {
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-            letter-spacing: 1px;
-        }
-
-        .form-container {
-            margin: auto;
-            max-width: 500px;
-        }
-
-        form input[type="file"],
-        form input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
-
-        form input::placeholder {
-            color: #ddd;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            background: #00c6ff;
-            border: none;
-            color: white;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.3s ease;
-        }
-
-        .btn:hover {
-            background: #0072ff;
-        }
-
-        .result-box {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .safe {
-            background: rgba(0, 255, 100, 0.2);
-            color: #00ff88;
-        }
-
-        .suspicious {
-            background: rgba(255, 165, 0, 0.2);
-            color: orange;
-        }
-
-        .phishing {
-            background: rgba(255, 0, 0, 0.2);
-            color: #ff4d4d;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-            border-radius: 10px;
-            border: none;
-            outline: none;
-            background-color: rgba(255, 255, 255, 0.15);
-            color: white;
-        }
-    </style>
-
+    <title>CyberShield</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='cybershield.css') }}">
+    <style>
+    .page-title {
+        text-align: center; margin-bottom: 30px;
+        font-size: 28px; letter-spacing: 1px;
+    }
+    .form-container { margin: auto; max-width: 500px; }
+    form input[type="file"],
+    form input[type="text"] {
+        width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 20px;
+        border-radius: 8px; border: none; outline: none;
+        background: rgba(255,255,255,0.15); color: white;
+    }
+    form input::placeholder { color: #ddd; }
+    .form-control {
+        width: 100%; padding: 12px; margin-top: 10px; margin-bottom: 10px;
+        border-radius: 10px; border: none; outline: none;
+        background-color: rgba(255,255,255,0.15); color: white;
+    }
+    .result-box { margin-top:20px; padding:15px; border-radius:10px; text-align:center; font-weight:bold; }
+    .safe       { background: rgba(0,255,100,0.2); color: #00ff88; }
+    .suspicious { background: rgba(255,165,0,0.2); color: orange; }
+    .phishing   { background: rgba(255,0,0,0.2);   color: #ff4d4d; }
+
+    nav { display:flex; justify-content:space-between; align-items:center; padding:18px 50px; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); position:relative; }
+    .nav-brand { text-decoration:none; color:white; font-size:22px; font-weight:800; letter-spacing:1px; }
+    .nav-brand span { color:#00c6ff; }
+    .nav-right { display:flex; align-items:center; gap:16px; margin-left:auto; }
+    .nav-user-link {
+        display:flex; align-items:center; gap:9px;
+        text-decoration:none; padding:7px 16px;
+        background:rgba(0,198,255,0.1); border:1px solid rgba(0,198,255,0.25);
+        border-radius:30px; transition:0.25s;
+    }
+    .nav-user-link:hover { background:rgba(0,198,255,0.2); border-color:#00c6ff; }
+    .nav-avatar {
+        width:28px; height:28px; border-radius:50%;
+        background:linear-gradient(135deg,#00c6ff,#0072ff);
+        display:flex; align-items:center; justify-content:center;
+        font-size:12px; font-weight:800; color:#fff; flex-shrink:0;
+    }
+    .nav-username { color:#fff; font-size:14px; font-weight:600; }
+    .nav-logout {
+        text-decoration:none; color:rgba(255,255,255,0.5);
+        font-size:13px; font-weight:500; padding:7px 14px;
+        border:1px solid rgba(255,255,255,0.12); border-radius:20px;
+        transition:0.2s;
+    }
+    .nav-logout:hover { color:#ff6b6b; border-color:rgba(255,100,100,0.4); background:rgba(255,60,60,0.08); }
+    </style>
 </head>
-
 <body>
-    <div>
-        <nav>
-            <a class="navbar" href="/home">CyberShield</a>
 
-            {% if session.get('user') %}
-            <div class="navbar-user-info">
-                <span class="navbar-username">👤 {{ session['user'] }}</span>
-                <a class="navbar-logout" href="/logout">Logout</a>
-            </div>
-            {% endif %}
-        </nav>
+<nav>
+    <a class="nav-brand" href="/home">Cyber<span>Shield</span></a>
+
+    {% if session.get('user') %}
+    <div class="nav-right">
+        <a class="nav-user-link" href="/profile" title="View your profile">
+            <div class="nav-avatar">{{ session['user'][0].upper() }}</div>
+            <span class="nav-username">{{ session['user'] }}</span>
+        </a>
+        <a class="nav-logout" href="/logout">Logout</a>
     </div>
+    {% endif %}
+</nav>
 
-    <div class="container">
-        {% block content %}{% endblock %}
-    </div>
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
 
-    <footer>
-        © 2026 CyberShield | Secure. Detect. Protect.
-    </footer>
+<footer>
+    © 2026 CyberShield | Secure. Detect. Protect.
+</footer>
 
 </body>
-
 </html>

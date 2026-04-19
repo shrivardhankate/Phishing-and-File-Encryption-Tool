@@ -1,29 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
-
 <h2 class="page-title">🔓 Decrypt File</h2>
-
 <div class="form-container">
     <div class="card">
-
         {% if error %}
-        <div style="background: rgba(255,0,0,0.2); color:#ff4d4d; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center;">
+        <div style="background:rgba(255,60,60,0.12); color:#ff6b6b; border:1px solid rgba(255,60,60,0.25); border-radius:10px; padding:12px 16px; font-size:14px; margin-bottom:20px;">
             {{ error }}
         </div>
         {% endif %}
-
         <form method="POST" enctype="multipart/form-data">
-            <label>Upload Encrypted File (.enc)</label>
-            <input type="file" name="file" required>
-
-            <label style="display:block;">Decryption Key</label>
-            <input type="text" name="key" placeholder="Paste your key here" required>
-
-            <button type="submit" class="btn" style="margin-top:15px;">Decrypt File</button>
+            <label style="font-size:13px; color:rgba(255,255,255,0.5);">Upload Encrypted File (.enc)</label>
+            <input type="file" name="file" accept=".enc" required>
+            <label style="font-size:13px; color:rgba(255,255,255,0.5); display:block; margin-top:8px;">Decryption Key</label>
+            <input type="text" name="key" placeholder="Paste your Fernet key here" required>
+            <button type="submit" class="btn" style="margin-top:8px;">Decrypt File</button>
         </form>
-
-        <a href="/home" class="btn" style="margin-top:10px; background: rgba(255,255,255,0.1);">Back to Home</a>
+        <a href="/home" class="btn" style="margin-top:10px; display:block; text-align:center; background:rgba(255,255,255,0.08);">Back to Home</a>
     </div>
 </div>
-
 {% endblock %}

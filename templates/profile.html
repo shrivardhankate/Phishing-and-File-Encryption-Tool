@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+/* ── Profile page styles ── */
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: rgba(0,198,255,0.07);
+    border: 1px solid rgba(0,198,255,0.18);
+    border-radius: 18px;
+    padding: 36px 40px;
+    margin-bottom: 40px;
+}
+.avatar-circle {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 4px rgba(0,198,255,0.2);
+}
+.hero-info h2 { font-size: 26px; margin-bottom: 4px; }
+.hero-info p  { color: rgba(255,255,255,0.5); font-size: 14px; }
+.hero-info .badge {
+    display: inline-block;
+    background: rgba(0,198,255,0.15);
+    color: #00c6ff;
+    border: 1px solid rgba(0,198,255,0.3);
+    border-radius: 20px;
+    padding: 3px 14px;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* Tabs */
+.tab-bar {
+    display: flex; gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+.tab-btn {
+    padding: 10px 22px;
+    border: none; border-radius: 10px 10px 0 0;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer; font-size: 14px; font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: 0.2s;
+    border-bottom: 3px solid transparent;
+}
+.tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.tab-btn.active { color: #00c6ff; border-bottom-color: #00c6ff; background: transparent; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Form sections */
+.section-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 24px;
+}
+.section-card h3 {
+    font-size: 16px; font-weight: 700;
+    color: #00c6ff; margin-bottom: 20px;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.field-row { margin-bottom: 18px; }
+.field-row label { display: block; font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 6px; }
+.field-row input {
+    width: 100%; padding: 11px 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; color: #fff; font-size: 14px;
+    outline: none; transition: 0.2s;
+}
+.field-row input:focus { border-color: #00c6ff; background: rgba(0,198,255,0.07); }
+.save-btn {
+    padding: 11px 28px; border-radius: 10px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff; border: none; font-weight: 700;
+    font-size: 14px; cursor: pointer; transition: 0.2s;
+}
+.save-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+/* Alert */
+.alert { padding: 11px 16px; border-radius: 10px; margin-bottom: 18px; font-size: 14px; }
+.alert-err  { background: rgba(255,60,60,0.15);  color: #ff6b6b; border: 1px solid rgba(255,60,60,0.3); }
+.alert-ok   { background: rgba(0,200,120,0.15); color: #00e887; border: 1px solid rgba(0,200,120,0.3); }
+
+/* History tables */
+.history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.history-table th {
+    text-align: left; padding: 10px 14px;
+    color: rgba(255,255,255,0.4); font-weight: 600;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-transform: uppercase; letter-spacing: 0.7px; font-size: 11px;
+}
+.history-table td { padding: 13px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+.history-table tr:last-child td { border-bottom: none; }
+.history-table tr:hover td { background: rgba(255,255,255,0.03); }
+.key-box {
+    font-family: monospace; font-size: 11px;
+    background: rgba(0,0,0,0.4); padding: 5px 9px;
+    border-radius: 6px; word-break: break-all;
+    max-width: 280px; display: inline-block;
+    color: #00c6ff;
+}
+.copy-btn {
+    padding: 4px 10px; font-size: 11px; border-radius: 6px;
+    border: 1px solid rgba(0,198,255,0.4); background: transparent;
+    color: #00c6ff; cursor: pointer; white-space: nowrap;
+    transition: 0.2s; margin-left: 6px;
+}
+.copy-btn:hover { background: rgba(0,198,255,0.15); }
+.dl-btn {
+    padding: 5px 12px; font-size: 12px; border-radius: 7px;
+    background: linear-gradient(135deg,#00c6ff,#0072ff);
+    color: #fff; text-decoration: none; font-weight: 600;
+    transition: 0.2s; white-space: nowrap;
+}
+.dl-btn:hover { opacity: 0.8; }
+.risk-badge {
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+}
+.risk-low    { background: rgba(0,200,120,0.15); color: #00e887; border: 1px solid rgba(0,200,120,0.3); }
+.risk-medium { background: rgba(255,180,0,0.15);  color: #ffc107; border: 1px solid rgba(255,180,0,0.3); }
+.risk-high   { background: rgba(255,60,60,0.15);  color: #ff6b6b; border: 1px solid rgba(255,60,60,0.3); }
+.empty-state { text-align: center; padding: 48px 20px; color: rgba(255,255,255,0.3); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+/* Stats row */
+.stats-row { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+.stat-chip {
+    flex: 1; min-width: 130px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 20px 22px;
+    text-align: center;
+}
+.stat-chip .num { font-size: 30px; font-weight: 700; color: #00c6ff; }
+.stat-chip .lbl { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+</style>
+
+<!-- Hero -->
+<div class="profile-hero">
+    <div class="avatar-circle">{{ user['username'][0].upper() }}</div>
+    <div class="hero-info">
+        <h2>{{ user['username'] }}</h2>
+        <p>{{ user['email'] if user['email'] else 'No email set' }}</p>
+        <p>Member since {{ user['created_at'][:10] }}</p>
+        <span class="badge">🛡️ CyberShield Member</span>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-row">
+    <div class="stat-chip">
+        <div class="num">{{ encrypt_logs|length }}</div>
+        <div class="lbl">Files Encrypted</div>
+    </div>
+    <div class="stat-chip">
+        <div class="num">{{ decrypt_logs|length }}</div>
+        <div class="lbl">Files Decrypted</div>
+    </div>
+    <div class="stat-chip">
+        <div class="num">{{ phishing_logs|length }}</div>
+        <div class="lbl">URLs Analyzed</div>
+    </div>
+    <div class="stat-chip">
+        <div class="num">{{ (encrypt_logs|length) + (decrypt_logs|length) + (phishing_logs|length) }}</div>
+        <div class="lbl">Total Actions</div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('details',this)">👤 Account Details</button>
+    <button class="tab-btn" onclick="switchTab('password',this)">🔑 Change Password</button>
+    <button class="tab-btn" onclick="switchTab('encrypted',this)">🔐 Encrypted Files</button>
+    <button class="tab-btn" onclick="switchTab('decrypted',this)">🔓 Decrypted Files</button>
+    <button class="tab-btn" onclick="switchTab('phishing',this)">🛡️ Phishing History</button>
+</div>
+
+<!-- Tab: Account Details -->
+<div id="tab-details" class="tab-panel active">
+    <div class="section-card">
+        <h3>✏️ Update Profile</h3>
+
+        {% if error_details %}
+        <div class="alert alert-err">⚠️ {{ error_details }}</div>
+        {% endif %}
+
+        <form method="POST" action="/profile/update-details">
+            <div class="field-row">
+                <label>Username</label>
+                <input type="text" name="username" value="{{ user['username'] }}" required>
+            </div>
+            <div class="field-row">
+                <label>Email Address</label>
+                <input type="email" name="email" value="{{ user['email'] if user['email'] else '' }}" placeholder="your@email.com">
+            </div>
+            <button class="save-btn" type="submit">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+<!-- Tab: Change Password -->
+<div id="tab-password" class="tab-panel">
+    <div class="section-card">
+        <h3>🔒 Change Password</h3>
+
+        {% if error_password %}
+        <div class="alert alert-err">⚠️ {{ error_password }}</div>
+        {% endif %}
+        {% if success_password %}
+        <div class="alert alert-ok">✅ {{ success_password }}</div>
+        {% endif %}
+
+        <form method="POST" action="/profile/change-password">
+            <div class="field-row">
+                <label>Current Password</label>
+                <input type="password" name="current_password" placeholder="Enter current password" required>
+            </div>
+            <div class="field-row">
+                <label>New Password</label>
+                <input type="password" name="new_password" placeholder="Min 6 chars, 1 uppercase, 1 number" required>
+            </div>
+            <div class="field-row">
+                <label>Confirm New Password</label>
+                <input type="password" name="confirm_password" placeholder="Repeat new password" required>
+            </div>
+            <button class="save-btn" type="submit">Update Password</button>
+        </form>
+    </div>
+</div>
+
+<!-- Tab: Encrypted Files -->
+<div id="tab-encrypted" class="tab-panel">
+    <div class="section-card">
+        <h3>🔐 Encryption History</h3>
+        {% if encrypt_logs %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>File Name</th>
+                    <th>Encryption Key</th>
+                    <th>Date</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in encrypt_logs %}
+            <tr>
+                <td style="color:rgba(255,255,255,0.3);">{{ loop.index }}</td>
+                <td>📄 {{ log['file_name'] }}</td>
+                <td>
+                    {% if log['encryption_key'] %}
+                    <span class="key-box" id="key-{{ loop.index }}">{{ log['encryption_key'] }}</span>
+                    <button class="copy-btn" onclick="copyKey('key-{{ loop.index }}')">Copy</button>
+                    {% else %}
+                    <span style="color:rgba(255,255,255,0.3);">—</span>
+                    {% endif %}
+                </td>
+                <td style="color:rgba(255,255,255,0.4); white-space:nowrap;">{{ log['timestamp'][:16] }}</td>
+                <td>
+                    <a href="/download-encrypted/{{ log['file_name'] }}.enc" class="dl-btn">⬇ Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="icon">🔐</div>
+            <p>No files encrypted yet.</p>
+            <a href="/encrypt" style="color:#00c6ff;">Encrypt your first file →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tab: Decrypted Files -->
+<div id="tab-decrypted" class="tab-panel">
+    <div class="section-card">
+        <h3>🔓 Decryption History</h3>
+        {% if decrypt_logs %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>File Name</th>
+                    <th>Date</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in decrypt_logs %}
+            <tr>
+                <td style="color:rgba(255,255,255,0.3);">{{ loop.index }}</td>
+                <td>📄 {{ log['file_name'] }}</td>
+                <td style="color:rgba(255,255,255,0.4); white-space:nowrap;">{{ log['timestamp'][:16] }}</td>
+                <td>
+                    <a href="/download-decrypted/{{ log['file_name'] }}" class="dl-btn">⬇ Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="icon">🔓</div>
+            <p>No files decrypted yet.</p>
+            <a href="/decrypt" style="color:#00c6ff;">Decrypt a file →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tab: Phishing History -->
+<div id="tab-phishing" class="tab-panel">
+    <div class="section-card">
+        <h3>🛡️ URL Analysis History</h3>
+        {% if phishing_logs %}
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>URL</th>
+                    <th>Risk Score</th>
+                    <th>Risk Level</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for log in phishing_logs %}
+            <tr>
+                <td style="color:rgba(255,255,255,0.3);">{{ loop.index }}</td>
+                <td style="max-width:220px; word-break:break-all; font-size:12px; color:#ccc;">
+                    {{ log['target_url'] if log['target_url'] else log['target_email'] }}
+                </td>
+                <td style="font-weight:700;">{{ log['score'] if log['score'] else '—' }}</td>
+                <td>
+                    {% set risk = log['status'] %}
+                    <span class="risk-badge 
+                        {% if 'Low' in risk %}risk-low
+                        {% elif 'Medium' in risk %}risk-medium
+                        {% else %}risk-high{% endif %}">
+                        {{ risk }}
+                    </span>
+                </td>
+                <td style="color:rgba(255,255,255,0.4); white-space:nowrap;">{{ log['timestamp'][:16] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <div class="icon">🛡️</div>
+            <p>No URLs analyzed yet.</p>
+            <a href="/phishing" style="color:#00c6ff;">Analyze a URL →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+}
+
+function copyKey(id) {
+    const el = document.getElementById(id);
+    navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+        const btn = el.nextElementSibling;
+        btn.textContent = 'Copied!';
+        btn.style.background = 'rgba(0,200,120,0.2)';
+        btn.style.borderColor = 'rgba(0,200,120,0.4)';
+        btn.style.color = '#00e887';
+        setTimeout(() => {
+            btn.textContent = 'Copy';
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+        }, 2000);
+    });
+}
+
+// Auto-open tab if there's an error/success
+{% if error_password or success_password %}
+switchTab('password', document.querySelectorAll('.tab-btn')[1]);
+{% endif %}
+{% if error_details %}
+switchTab('details', document.querySelectorAll('.tab-btn')[0]);
+{% endif %}
+</script>
+
+{% endblock %}

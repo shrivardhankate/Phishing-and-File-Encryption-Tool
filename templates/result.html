@@ -1,33 +1,55 @@
 {% extends "base.html" %}
 {% block content %}
+<style>
+.result-hero { text-align:center; margin-bottom:36px; }
+.risk-big { font-size:52px; font-weight:800; margin:8px 0; }
+.risk-big.low    { color:#00e887; }
+.risk-big.medium { color:#ffc107; }
+.risk-big.high   { color:#ff6b6b; }
+.url-display { background:rgba(0,0,0,0.3); border-radius:10px; padding:12px 18px; font-family:monospace; font-size:13px; word-break:break-all; color:#00c6ff; margin-bottom:24px; text-align:left; }
+.score-bar-wrap { background:rgba(255,255,255,0.08); border-radius:20px; height:10px; margin-bottom:28px; overflow:hidden; }
+.score-bar { height:100%; border-radius:20px; transition:width 1s ease; }
+.reasons-list { list-style:none; padding:0; }
+.reasons-list li { padding:11px 16px; margin-bottom:8px; background:rgba(255,255,255,0.05); border-radius:10px; font-size:14px; border-left:3px solid rgba(255,255,255,0.1); }
+.reasons-list li:has(✅) { border-left-color:#00e887; }
+.reasons-list li:has(⚠️) { border-left-color:#ffc107; }
+.reasons-list li:has(🚨) { border-left-color:#ff6b6b; }
+.action-row { display:flex; gap:12px; margin-top:28px; flex-wrap:wrap; }
+</style>
 
 <h2 class="page-title">🛡️ Phishing Analysis Result</h2>
 
-<div class="form-container" style="max-width: 700px;">
+<div class="form-container" style="max-width:680px;">
     <div class="card">
-        <p><strong>URL Analyzed:</strong> <code style="word-break:break-all; color:#00c6ff;">{{ url }}</code></p>
-        <p style="margin-top:10px;"><strong>Risk Score:</strong> {{ score }} / 100+</p>
+        <div class="result-hero">
+            <div class="url-display">{{ url }}</div>
 
-        <div class="result-box 
-            {% if 'Low' in risk %}safe
-            {% elif 'Medium' in risk %}suspicious
-            {% else %}phishing{% endif %}"
-            style="margin: 20px 0; font-size: 20px;">
-            {{ risk }}
+            {% set pct = [score, 100]|min %}
+            {% if 'Low' in risk %}
+            <div class="risk-big low">{{ risk }}</div>
+            {% elif 'Medium' in risk %}
+            <div class="risk-big medium">{{ risk }}</div>
+            {% else %}
+            <div class="risk-big high">{{ risk }}</div>
+            {% endif %}
+
+            <p style="color:rgba(255,255,255,0.4); font-size:14px; margin-bottom:16px;">Risk Score: <strong style="color:#fff;">{{ score }}</strong></p>
+            <div class="score-bar-wrap">
+                <div class="score-bar" style="width:{{ pct }}%; background:{% if 'Low' in risk %}#00e887{% elif 'Medium' in risk %}#ffc107{% else %}#ff6b6b{% endif %};"></div>
+            </div>
         </div>
 
-        <h3 style="margin-bottom:10px;">📋 Analysis Details:</h3>
-        <ul style="list-style: none; padding: 0;">
+        <h3 style="font-size:13px; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,0.4); margin-bottom:14px;">Analysis Details</h3>
+        <ul class="reasons-list">
             {% for reason in reasons %}
-            <li style="padding: 8px; margin: 5px 0; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                • {{ reason }}
-            </li>
+            <li>{{ reason }}</li>
             {% endfor %}
         </ul>
 
-        <a href="/phishing" class="btn" style="margin-top: 20px;">Check Another URL</a>
-        <a href="/home" class="btn" style="margin-top: 10px; background: rgba(255,255,255,0.1);">Back to Home</a>
+        <div class="action-row">
+            <a href="/phishing" class="btn" style="flex:1; text-align:center;">Check Another URL</a>
+            <a href="/home" class="btn" style="flex:1; text-align:center; background:rgba(255,255,255,0.1);">Back to Home</a>
+        </div>
     </div>
 </div>
-
 {% endblock %}

@@ -18,6 +18,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
+        email TEXT DEFAULT '',
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     ''')
@@ -28,6 +29,7 @@ def init_db():
         user_id INTEGER,
         file_name TEXT,
         action TEXT,
+        encryption_key TEXT DEFAULT NULL,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     ''')
@@ -35,11 +37,34 @@ def init_db():
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS phishing_logs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        target_email TEXT,
+        user_id INTEGER DEFAULT NULL,
+        target_url TEXT,
+        score INTEGER DEFAULT 0,
         status TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     ''')
+
+    try:
+        cursor.execute("ALTER TABLE file_logs ADD COLUMN encryption_key TEXT DEFAULT NULL")
+    except:
+        pass
+    try:
+        cursor.execute("ALTER TABLE phishing_logs ADD COLUMN user_id INTEGER DEFAULT NULL")
+    except:
+        pass
+    try:
+        cursor.execute("ALTER TABLE phishing_logs ADD COLUMN target_url TEXT")
+    except:
+        pass
+    try:
+        cursor.execute("ALTER TABLE phishing_logs ADD COLUMN score INTEGER DEFAULT 0")
+    except:
+        pass
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
+    except:
+        pass
 
     conn.commit()
     conn.close()
