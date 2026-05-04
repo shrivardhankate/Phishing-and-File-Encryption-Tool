@@ -10,6 +10,7 @@ from database import init_db, get_db_connection
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from ml_phishing import predict_url
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER   = os.path.join(BASE_DIR, "uploads")
@@ -312,6 +313,14 @@ def analyze():
 
     score = 0
     reasons = []
+
+    ml_result, ml_confidence = predict_url(url)
+
+    if ml_result == "Phishing":
+        score += 35
+        reasons.append(f"AI Model Prediction: Phishing ({ml_confidence}% confidence)")
+    else:
+        reasons.append(f"AI Model Prediction: Legitimate ({100 - ml_confidence}% confidence)")
 
     exists, status_code = check_website_exists(url)
 
